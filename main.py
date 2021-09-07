@@ -450,7 +450,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setupUi()
 
     def check_questions_txt(self):
-        with open('questions.txt', 'w+') as f:
+        with open('questions.txt', 'a+') as f:
             data = f.readlines()
             for i in range(25):
                 try:
@@ -462,7 +462,7 @@ class MainWindow(QtWidgets.QMainWindow):
             f.writelines(data)
 
     def check_answers_txt(self):
-        with open('answers.txt', 'w+') as f:
+        with open('answers.txt', 'a+') as f:
             data = f.readlines()
             for i in range(25):
                 try:
