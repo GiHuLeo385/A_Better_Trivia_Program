@@ -1,8 +1,10 @@
 # This programme is created to serve TIU IRSA's Trivia Night and is open source
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-import os, sys
+import os
+import sys
 from time import sleep
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 #  Open the edit box for the themes
@@ -367,14 +369,14 @@ class Q_and_A_Box(QtWidgets.QWidget):
         second = self.timer.time().second()
         self.open_timer(minute, second)
 
+    def open_timer(self, minute, second):
+        self.timer_box = Timer_Box(minute, second)
+        self.timer_box.show()
+
     def open_answer_box(self):
         self.answer_label.show()
         self.give_point_button.show()
         self.no_point_button.show()
-
-    def open_timer(self, minute, second):
-        self.timer_box = Timer_Box(minute, second)
-        self.timer_box.show()
 
     def scored(self):
         self.score = ((self.position % 5) + 1) * 100
@@ -1329,11 +1331,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                  "background-color: rgb(129, 20, 30);")
         self.team2.setStyleSheet("color: rgb(255, 255, 255);\n"
                                  "background-color: rgb(129, 20, 30);")
+        self.end_game_screen = QtWidgets.QWidget()
         if self.score1_num > self.score2_num:
             self.end_game_screen = End_Game(self.team1.text(), self.score1_num)
+            self.end_game_screen.show()
         elif self.score1_num < self.score2_num:
             self.end_game_screen = End_Game(self.team2.text(), self.score2_num)
-        self.end_game_screen.show()
+            self.end_game_screen.show()
         self.team_in_turn, self.score1_num, self.score2_num = 0, 0, 0
         self.score1.setText(str(self.score1_num))
         self.score2.setText(str(self.score2_num))
