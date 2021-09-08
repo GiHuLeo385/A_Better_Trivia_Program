@@ -1,4 +1,12 @@
-# This programme is created to serve TIU IRSA's Trivia Night and is open source
+# TIU IRSA Trivia Night v.1.0
+#
+# Author: Pham Q. Dung (Jay)
+# Affiliation (Current): Postgraduate Student - MSc International Relations (Research) at LSE, London.
+#
+# Description:
+# This programme is designed for the TIU IR Student Association of Tokyo International University, Japan.
+# It is open source and licensed under the MIT license. Please give credit if you are modifying less than 50% of the
+# programme.
 
 import os
 import sys
@@ -7,15 +15,18 @@ from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-#  Open the edit box for the themes
+# The below classes are the GUI boxes defined using PyQt5 QWidget that will be opened within the programme outside of
+# the Main Window.
+
+#  Open the edit box for the themes. This box allows for the edit of all the theme labels.
 class ThemeBox(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.resize(400, 380)
         self.setWindowTitle('Theme Change')
-        self.themebox_gui()
+        self.theme_box_gui()
 
-    def themebox_gui(self):
+    def theme_box_gui(self):
         self.theme_1 = QtWidgets.QLabel(self)
         self.theme_1.setGeometry(10, 40, 70, 25)
         self.theme_1.setText('Theme 1:')
@@ -73,6 +84,8 @@ class ThemeBox(QtWidgets.QWidget):
 
         #  Actions when buttons are pressed:
         self.cancel_option.clicked.connect(lambda: self.close())
+        #  This part lacks a click action for the button 'save_option' because it will be triggered in MainWindow()
+        #  rather than here in order to return the 5 themes and changed the labels defined in MainWindow().
 
     #  Functions for the buttons
     def get_theme_1(self):
@@ -96,13 +109,15 @@ class ThemeBox(QtWidgets.QWidget):
         return self.new_theme_5
 
 
-#  Open the edit box to edit the answers and questions and write to txt file
+#  Open the edit box to edit the answers and questions and write to txt file. From this box, you can edit both the
+#  questions and answers of each of the question box. The script will also write and save them to two txt files, from
+#  which they can be retrived when played. For this function, see the class Q_and_A_Box
 class EditBox(QtWidgets.QWidget):
     def __init__(self, position):
         super().__init__()
         self.resize(700, 400)
         self.setWindowTitle('Edit Question & Answer')
-        self.position = position
+        self.position = position  # This variable takes the distinctively assigned position of each box
         self.edit_box_gui(self.position)
 
     def edit_box_gui(self, position):
@@ -155,6 +170,7 @@ class EditBox(QtWidgets.QWidget):
         self.close()
 
 
+#  This box allows for the change of team names. This is self-explanatory.
 class NameChangeDialogue(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -183,18 +199,19 @@ class NameChangeDialogue(QtWidgets.QWidget):
         self.cancel_option.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
         #  Actions when buttons are pressed:
-        self.save_option.clicked.connect(self.get_new_name)
         self.cancel_option.clicked.connect(lambda: self.close())
+        #  Like above, this part lacks an action for the save button when clicked because it is triggered in the
+        #  MainWindow() rather than there to return the name and change the corresponding label there.
 
     #  Actions for the name change dialogue box:
-    def get_new_name(self):
+    def pass_new_name(self):
         self.new_name_change = self.name_change_box.toPlainText()
         self.close()
-
-    def pass_new_name(self):
         return self.new_name_change
 
 
+#  This class is a timer that runs in the background on another thread distinct from the main PyQt thread. This is
+#  necessary since the GUI needs to update every time a second is passed, which it sends a signal for the GUI to update
 class Count_Down(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
@@ -209,6 +226,7 @@ class Count_Down(QtCore.QObject):
         self.finished.emit()
 
 
+#  This is the GUI for the timer. This class takes the signal from Count_Down() in order to update the timer label.
 class Timer_Box(QtWidgets.QWidget):
     def __init__(self, minute, second):
         super().__init__()
@@ -227,7 +245,7 @@ class Timer_Box(QtWidgets.QWidget):
         self.close_window.setGeometry(155, 210, 90, 30)
         self.close_window.setText('Close')
 
-        self.close_window.clicked.connect(self.close_function)
+        self.close_window.clicked.connect(lambda: self.close())
 
     def longtask(self):
         self.thread = QtCore.QThread()
@@ -244,10 +262,8 @@ class Timer_Box(QtWidgets.QWidget):
     def update_clock(self, time):
         self.clock.setText(time)
 
-    def close_function(self):
-        self.close()
 
-
+#  This box is the main box where the questions, answers, timer, and point rewards are contained.
 class Q_and_A_Box(QtWidgets.QWidget):
     def __init__(self, position):
         super().__init__()
@@ -336,7 +352,7 @@ class Q_and_A_Box(QtWidgets.QWidget):
         self.give_point_button.setGeometry(430, 870, 130, 40)
         self.give_point_button.setFont(QtGui.QFont('Baskerville Old Face', 14))
         self.give_point_button.setStyleSheet('color: rgb(255, 255, 255);\n'
-                                             'background-color: rgb(129, 20, 30);')
+                                                'background-color: rgb(129, 20, 30);')
         self.give_point_button.setText('Give Points')
         self.give_point_button.hide()
 
@@ -359,9 +375,7 @@ class Q_and_A_Box(QtWidgets.QWidget):
         self.timer_start.clicked.connect(self.get_current_time)
 
         self.show_answer.clicked.connect(self.open_answer_box)
-
-        self.give_point_button.clicked.connect(self.scored)
-        self.no_point_button.clicked.connect(self.no_scored)
+        #  There is no defined actions for the points buttons here because both are called elsewhere in MainWindow()
 
     #  Usuable functions for button pressed:
     def get_current_time(self):
@@ -378,18 +392,13 @@ class Q_and_A_Box(QtWidgets.QWidget):
         self.give_point_button.show()
         self.no_point_button.show()
 
-    def scored(self):
+    def get_scored(self):
         self.score = ((self.position % 5) + 1) * 100
         self.close()
-
-    def no_scored(self):
-        self.score = 0
-        self.close()
-
-    def get_scored(self):
         return self.score
 
 
+#  This box will appeared when the 'endgame' button is pushed in order to count the point and display the winner.
 class End_Game(QtWidgets.QWidget):
     def __init__(self, team, score):
         super().__init__()
@@ -451,27 +460,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def check_questions_txt(self):
         with open('questions.txt', 'a+') as f:
-            data = f.readlines()
-            for i in range(25):
-                try:
-                    if data[i] != "":
-                        pass
-                except IndexError:
-                    data += ['\n']
             f.seek(0, 0)
-            f.writelines(data)
+            data = f.readlines()
+            for _ in range(25 - len(data)):
+                f.write('\n')
 
     def check_answers_txt(self):
         with open('answers.txt', 'a+') as f:
-            data = f.readlines()
-            for i in range(25):
-                try:
-                    if data[i] != "":
-                        pass
-                except IndexError:
-                    data += ['\n']
             f.seek(0, 0)
-            f.writelines(data)
+            data = f.readlines()
+            for _ in range(25 - len(data)):
+                f.write('\n')
 
     def setupUi(self):
         self.setObjectName("MainWindow")
@@ -1116,10 +1115,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuEdit = QtWidgets.QMenu(self.menubar)
         self.menuEdit.setObjectName("menuEdit")
         self.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(self)
-        self.statusbar.setStyleSheet("background-color: rgb(255, 255, 255);")
-        self.statusbar.setObjectName("statusbar")
-        self.setStatusBar(self.statusbar)
+
         self.actionOpen_file = QtWidgets.QAction(self)
         self.actionOpen_file.setObjectName("actionOpen_file")
         self.actionSave_staet = QtWidgets.QAction(self)
